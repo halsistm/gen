@@ -201,6 +201,7 @@
           <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;margin-left:auto;display:none">SHARE</button>
         </div>
         <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
+          <button id="btnFXOFF" class="rg-btn" style="opacity:.5">OFF</button>
           <button id="btnHUE" class="rg-btn active" style="opacity:.9">HUE</button>
           <button id="btnPULSE" class="rg-btn" style="opacity:.5">PULSE</button>
           <button id="btnSCAN" class="rg-btn" style="opacity:.5">SCAN</button>
@@ -514,6 +515,13 @@
       $('rgvstat').textContent = 'RUNNING // ' + cycleMode.toUpperCase() + '_';
     }
 
+    function stopCycle() {
+      if (cycleRaf) {
+        cancelAnimationFrame(cycleRaf);
+        cycleRaf = null;
+      }
+    }
+
 
     // ─── PHOTO ENGINE ────────────────────────────────────
     let photoRawData = null;
@@ -557,8 +565,13 @@
     function updateCyclePalette(id) {
       const { indices, palette } = buildPaletteMap(id, CV_W, CV_H);
       cycleIndices = indices; cyclePalette = palette;
-      $('rgvstat').textContent = `PALETTE // ${palette.length} COLORS_`;
-      startCycle();
+      if (cycleMode === 'off') {
+        stopCycle();
+        $('rgvstat').textContent = `FX OFF // ${palette.length} COLORS_`;
+      } else {
+        $('rgvstat').textContent = `PALETTE // ${palette.length} COLORS_`;
+        startCycle();
+      }
     }
 
 
@@ -574,13 +587,20 @@
     }));
 
     // Cycle mode
-    const modeBtns = [$('btnHUE'), $('btnPULSE'), $('btnSCAN'), $('btnGLITCH'), $('btnPLASMA'), $('btnVHS')];
+    const modeBtns = [$('btnFXOFF'), $('btnHUE'), $('btnPULSE'), $('btnSCAN'), $('btnGLITCH'), $('btnPLASMA'), $('btnVHS')];
     modeBtns.forEach(b => b.addEventListener('click', () => {
-      const newMode = b.id.replace('btn', '').toLowerCase();
+      const newMode = b.id === 'btnFXOFF' ? 'off' : b.id.replace('btn', '').toLowerCase();
       cycleMode = newMode;
       glitchRng = mkR(Date.now());
       setActive(modeBtns, b);
-      if (cyclePalette) $('rgvstat').textContent = 'RUNNING // ' + cycleMode.toUpperCase() + '_';
+      if (!cyclePalette) return;
+      if (cycleMode === 'off') {
+        stopCycle();
+        applyPhotoMode(photoMode);
+        $('rgvstat').textContent = 'FX OFF_';
+      } else {
+        startCycle();
+      }
     }));
 
     // Speed
