@@ -37,14 +37,14 @@
   }
 
   .rg-label {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 2px;
     opacity: .32;
     margin-bottom: 6px
   }
 
   .rg-sub {
-    font-size: 7px;
+    font-size: 11px;
     letter-spacing: 1px;
     opacity: .22;
     margin-top: 3px
@@ -63,9 +63,9 @@
     background: transparent;
     border: 1px solid #183818;
     color: #39ff14;
-    font-size: 9px;
+    font-size: 13px;
     letter-spacing: 1px;
-    padding: 4px 9px;
+    padding: 6px 11px;
     cursor: pointer
   }
 
@@ -142,7 +142,7 @@
   }
 
   #rg-upload-zone .uz-text {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 1px;
     opacity: .45;
     line-height: 1.7;
@@ -150,7 +150,7 @@
 
   #rg-upload-zone .uz-badge {
     margin-left: auto;
-    font-size: 7px;
+    font-size: 10px;
     letter-spacing: 2px;
     opacity: .22;
   }
@@ -162,7 +162,7 @@
     style="background:#060609;border-radius:8px;padding:18px 20px 20px;font-family:'Courier New',Courier,monospace;color:#39ff14;border:1px solid #12301a;max-width:900px;margin:0 auto">
 
     <!-- HEADER -->
-    <div style="font-size:8px;letter-spacing:4px;opacity:.38;margin-bottom:14px">
+    <div style="font-size:12px;letter-spacing:4px;opacity:.38;margin-bottom:14px">
       RETRO.GEN v4.0 // PHOTO.256 // COLOR.CYCLE // CHIPTUNE // NO API
     </div>
 
@@ -189,20 +189,18 @@
           <canvas id="rgpc" width="128" height="128" class="rg-cv" style="width:100%"></canvas>
           <div class="scan-overlay"></div>
           <div id="rgrec-badge"
-            style="display:none;position:absolute;top:4px;right:6px;font-size:7px;letter-spacing:1px;color:#ff3939">●
+            style="display:none;position:absolute;top:4px;right:6px;font-size:10px;letter-spacing:1px;color:#ff3939">●
             REC</div>
         </div>
         <div style="margin-top:5px;display:flex;gap:5px;align-items:center">
-          <div id="rgpstat" style="font-size:8px;letter-spacing:1px;opacity:.35">READY_</div>
-          <div id="rgvstat" style="font-size:8px;letter-spacing:1px;opacity:.3;margin-left:auto">WAITING FOR PHOTO_</div>
+          <div id="rgpstat" style="font-size:12px;letter-spacing:1px;opacity:.35">READY_</div>
+          <div id="rgvstat" style="font-size:12px;letter-spacing:1px;opacity:.3;margin-left:auto">WAITING FOR PHOTO_</div>
         </div>
         <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btn256" class="rg-btn active" style="opacity:.9">256</button>
           <button id="btnPX" class="rg-btn" style="opacity:.5">PX</button>
           <button id="btnDITH" class="rg-btn" style="opacity:.5">DITH</button>
-          <button id="btnSaveImg" class="rg-btn" style="border-color:#39ff14;margin-left:auto">SAVE (PNG)</button>
-          <button id="btnSaveImgJpg" class="rg-btn" style="border-color:#39ff14">JPG</button>
-          <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;display:none">SHARE</button>
+          <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;margin-left:auto;display:none">SHARE</button>
         </div>
         <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btnHUE" class="rg-btn active" style="opacity:.9">HUE</button>
@@ -213,7 +211,7 @@
           <button id="btnVHS" class="rg-btn" style="opacity:.5">VHS</button>
         </div>
         <div style="margin-top:5px;display:flex;gap:4px;align-items:center">
-          <span style="font-size:7px;opacity:.3;letter-spacing:1px">SPD</span>
+          <span style="font-size:10px;opacity:.3;letter-spacing:1px">SPD</span>
           <button id="btnS1" class="rg-btn" style="opacity:.5;padding:3px 7px">▶</button>
           <button id="btnS2" class="rg-btn active" style="opacity:.9;padding:3px 7px">▶▶</button>
           <button id="btnS3" class="rg-btn" style="opacity:.5;padding:3px 7px">▶▶▶</button>
@@ -227,24 +225,24 @@
       <!-- ② MUSIC // CHIPTUNE -->
       <div class="rg-panel" style="flex:1;min-width:140px">
         <div class="rg-label">MUSIC // CHIPTUNE</div>
-        <div id="rgmi" style="font-size:11px;line-height:2;opacity:.65;min-height:66px">--</div>
+        <div id="rgmi" style="font-size:15px;line-height:1.8;opacity:.65;min-height:66px">--</div>
         <div class="rg-label" style="margin-top:8px">MELODY VIZ</div>
         <canvas id="rgn" width="150" height="40"
           style="display:block;border:1px solid #122012;margin-bottom:10px"></canvas>
         <div style="display:flex;gap:6px;align-items:center">
           <button id="rgplay"
-            style="background:transparent;border:1px solid #39ff14;color:#39ff14;font-size:10px;letter-spacing:2px;padding:7px 16px;cursor:pointer">▶
+            style="background:transparent;border:1px solid #39ff14;color:#39ff14;font-size:14px;letter-spacing:2px;padding:8px 16px;cursor:pointer">▶
             PLAY</button>
           <button id="rgregen"
-            style="background:transparent;border:1px solid #183818;color:#39ff14;font-size:10px;letter-spacing:2px;padding:7px 12px;cursor:pointer"
+            style="background:transparent;border:1px solid #183818;color:#39ff14;font-size:14px;letter-spacing:2px;padding:8px 12px;cursor:pointer"
             title="音楽を再生成">↻ GEN</button>
         </div>
-        <div id="rgwav" style="margin-top:10px;font-size:10px;opacity:.28;letter-spacing:2px">♩ ♪ ♫ ♬ ♩ ♪ ♫ ♬</div>
+        <div id="rgwav" style="margin-top:10px;font-size:13px;opacity:.28;letter-spacing:2px">♩ ♪ ♫ ♬ ♩ ♪ ♫ ♬</div>
       </div>
 
     </div><!-- /grid -->
 
-    <div id="rgs" style="margin-top:14px;font-size:8px;opacity:.22;letter-spacing:1px">READY_</div>
+    <div id="rgs" style="margin-top:14px;font-size:12px;opacity:.22;letter-spacing:1px">READY_</div>
   </div>
 </div>
 
@@ -581,22 +579,6 @@
     if (canShare) {
       $('btnShareImg').style.display = 'inline-block';
     }
-
-    $('btnSaveImg').addEventListener('click', () => {
-      const cv = $('rgpc');
-      const a = document.createElement('a');
-      a.href = cv.toDataURL('image/png');
-      a.download = `retro_photo_${Date.now()}.png`;
-      a.click();
-    });
-
-    $('btnSaveImgJpg').addEventListener('click', () => {
-      const cv = $('rgpc');
-      const a = document.createElement('a');
-      a.href = cv.toDataURL('image/jpeg', 0.9);
-      a.download = `retro_photo_${Date.now()}.jpg`;
-      a.click();
-    });
 
     $('btnShareImg').addEventListener('click', async () => {
       const cv = $('rgpc');
