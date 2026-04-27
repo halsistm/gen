@@ -54,7 +54,9 @@
     image-rendering: -moz-crisp-edges;
     image-rendering: pixelated;
     border: 1px solid #122012;
-    display: block
+    display: block;
+    max-width: 100%;
+    height: auto;
   }
 
   .rg-btn {
@@ -157,7 +159,7 @@
 
 <div style="padding:2px 0">
   <div id="rg"
-    style="background:#060609;border-radius:8px;padding:18px 20px 20px;font-family:'Courier New',Courier,monospace;color:#39ff14;border:1px solid #12301a;max-width:900px">
+    style="background:#060609;border-radius:8px;padding:18px 20px 20px;font-family:'Courier New',Courier,monospace;color:#39ff14;border:1px solid #12301a;max-width:900px;margin:0 auto">
 
     <!-- HEADER -->
     <div style="font-size:8px;letter-spacing:4px;opacity:.38;margin-bottom:14px">
@@ -183,8 +185,8 @@
       <!-- ① PHOTO // 256-COLOR -->
       <div class="rg-panel">
         <div class="rg-label">PHOTO // 256-COLOR</div>
-        <div class="cv-wrap">
-          <canvas id="rgpc" width="128" height="128" class="rg-cv" style="width:384px;height:384px"></canvas>
+        <div class="cv-wrap" style="width:100%;max-width:384px">
+          <canvas id="rgpc" width="128" height="128" class="rg-cv" style="width:100%"></canvas>
           <div class="scan-overlay"></div>
         </div>
         <div style="margin-top:5px;display:flex;gap:5px;align-items:center">
@@ -194,6 +196,9 @@
           <button id="btn256" class="rg-btn active" style="opacity:.9">256</button>
           <button id="btnPX" class="rg-btn" style="opacity:.5">PX</button>
           <button id="btnDITH" class="rg-btn" style="opacity:.5">DITH</button>
+          <button id="btnSaveImg" class="rg-btn" style="border-color:#39ff14;margin-left:auto">SAVE (PNG)</button>
+          <button id="btnSaveImgJpg" class="rg-btn" style="border-color:#39ff14">JPG</button>
+          <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;display:none">SHARE</button>
         </div>
         <div class="rg-sub">256=QUANTIZE / PX=PIXELATE / DITH=DITHER</div>
       </div>
@@ -201,8 +206,8 @@
       <!-- ② VIDEO // COLOR CYCLE -->
       <div class="rg-panel">
         <div class="rg-label">VIDEO // COLOR CYCLE</div>
-        <div class="cv-wrap">
-          <canvas id="rgvc" width="128" height="128" class="rg-cv" style="width:192px;height:192px"></canvas>
+        <div class="cv-wrap" style="width:100%;max-width:192px">
+          <canvas id="rgvc" width="128" height="128" class="rg-cv" style="width:100%"></canvas>
           <div class="scan-overlay"></div>
           <div id="rgrec-badge"
             style="display:none;position:absolute;top:4px;right:6px;font-size:7px;letter-spacing:1px;color:#ff3939">●
@@ -585,6 +590,41 @@
     const spdVals = [0.6, 2, 5];
     spdBtns.forEach((b, i) => b.addEventListener('click', () => { cycleSpeed = spdVals[i]; setActive(spdBtns, b); }));
 
+    // ─── SAVE / SHARE ────────────────────────────────────
+    const canShare = !!(navigator.share && navigator.canShare);
+    if (canShare) {
+      $('btnShareImg').style.display = 'inline-block';
+    }
+
+    $('btnSaveImg').addEventListener('click', () => {
+      const cv = $('rgpc');
+      const a = document.createElement('a');
+      a.href = cv.toDataURL('image/png');
+      a.download = `retro_photo_${Date.now()}.png`;
+      a.click();
+    });
+
+    $('btnSaveImgJpg').addEventListener('click', () => {
+      const cv = $('rgpc');
+      const a = document.createElement('a');
+      a.href = cv.toDataURL('image/jpeg', 0.9);
+      a.download = `retro_photo_${Date.now()}.jpg`;
+      a.click();
+    });
+
+    $('btnShareImg').addEventListener('click', async () => {
+      const cv = $('rgpc');
+      cv.toBlob(async (blob) => {
+        if (!blob) return;
+        const f = new File([blob], `retro_photo_${Date.now()}.png`, { type: 'image/png' });
+        try {
+          await navigator.share({ files: [f], title: 'RETRO.GEN Photo' });
+        } catch (e) {
+          console.log('Share failed', e);
+        }
+      }, 'image/png');
+    });
+
     // ─── RECORD (MediaRecorder → WebM) ───────────────────
     let recorder = null, recChunks = [], isRec = false;
     $('btnREC').addEventListener('click', () => {
@@ -594,10 +634,23 @@
         recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
         recChunks = [];
         recorder.ondataavailable = e => recChunks.push(e.data);
-        recorder.onstop = () => {
+        recorder.onstop = async () => {
           const blob = new Blob(recChunks, { type: 'video/webm' });
-          const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-          a.download = 'retrocycle_upload.webm'; a.click();
+          const url = URL.createObjectURL(blob);
+          
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'video.webm', { type: 'video/webm' })] })) {
+            const f = new File([blob], `retro_cycle_${Date.now()}.webm`, { type: 'video/webm' });
+            try {
+              await navigator.share({ files: [f], title: 'RETRO.GEN Video' });
+            } catch (e) {
+              const a = document.createElement('a'); a.href = url;
+              a.download = f.name; a.click();
+            }
+          } else {
+            const a = document.createElement('a'); a.href = url;
+            a.download = `retro_cycle_${Date.now()}.webm`; a.click();
+          }
+          
           isRec = false; $('btnREC').textContent = '● REC'; $('btnREC').classList.remove('recording');
           $('rgrec-badge').style.display = 'none';
         };
