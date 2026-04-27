@@ -10,7 +10,6 @@
   <meta name="description" content="アップロード画像を256色レトロスタイルに変換、カラーサイクル動画生成、チップチューン自動作曲">
 </head>
 <body style="margin:0;padding:12px;background:#030305;min-height:100vh">
-<h2 class="sr-only">レトロジェネレーター v4: 256色フォト・カラーサイクル動画・チップチューン</h2>
 <style>
   * {
     box-sizing: border-box
@@ -163,7 +162,7 @@
 
     <!-- HEADER -->
     <div style="font-size:12px;letter-spacing:4px;opacity:.38;margin-bottom:14px">
-      RETRO.GEN v4.0 // PHOTO.256 // COLOR.CYCLE // CHIPTUNE // NO API
+
     </div>
 
     <!-- UPLOAD ZONE -->
@@ -198,7 +197,6 @@
         </div>
         <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btn256" class="rg-btn active" style="opacity:.9">256</button>
-          <button id="btnPX" class="rg-btn" style="opacity:.5">PX</button>
           <button id="btnDITH" class="rg-btn" style="opacity:.5">DITH</button>
           <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;margin-left:auto;display:none">SHARE</button>
         </div>
@@ -210,6 +208,13 @@
           <button id="btnPLASMA" class="rg-btn" style="opacity:.5">PLASMA</button>
           <button id="btnVHS" class="rg-btn" style="opacity:.5">VHS</button>
         </div>
+        <div style="margin-top:5px;display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:10px;opacity:.3;letter-spacing:1px">RES</span>
+          <button id="btnR128" class="rg-btn active" style="opacity:.9;padding:3px 7px">128</button>
+          <button id="btnR256" class="rg-btn" style="opacity:.5;padding:3px 7px">256</button>
+          <button id="btnR512" class="rg-btn" style="opacity:.5;padding:3px 7px">512</button>
+          <button id="btnR1024" class="rg-btn" style="opacity:.5;padding:3px 7px">1024</button>
+        </div>
         <div style="margin-top:5px;display:flex;gap:4px;align-items:center">
           <span style="font-size:10px;opacity:.3;letter-spacing:1px">SPD</span>
           <button id="btnS1" class="rg-btn" style="opacity:.5;padding:3px 7px">▶</button>
@@ -218,7 +223,7 @@
           <button id="btnREC" class="rg-btn" style="opacity:.7;margin-left:auto;color:#ff6666;border-color:#3a1212">●
             REC</button>
         </div>
-        <div class="rg-sub">256=QUANTIZE / PX=PIXELATE / DITH=DITHER</div>
+        <div class="rg-sub">256=QUANTIZE / DITH=DITHER</div>
         <div class="rg-sub">FX + WEBM CAPTURE / ~3SEC</div>
       </div>
 
@@ -323,7 +328,7 @@
     }
 
     // ─── COLOR CYCLE RENDERER ─────────────────────────────
-    const CV_W = 128, CV_H = 128;
+    let CV_W = 128, CV_H = 128;
 
     let cycleIndices = null, cyclePalette = null;
     let cycleRaf = null, cycleT = 0;
@@ -331,13 +336,20 @@
     let glitchRng = mkR(42);
 
     // ─── MATRIX STATE ─────────────────────────────────────
-    const MTX_COLS = Math.floor(128 / 6); // ~21 columns
-    const matrixDrops = new Uint8Array(MTX_COLS).fill(0);
+    let matrixDrops = [];
     const matrixChars = '0123456789ABCDEF#$%&?!@';
     let matrixBuf = null; // persisted canvas for trails
 
     // ─── VHS STATE ────────────────────────────────────────
     let vhsNoise = null;
+
+    function resetDynamicBuffers() {
+      const cols = Math.floor(CV_W / 6);
+      matrixDrops = new Uint16Array(Math.max(1, cols)).fill(0);
+      matrixBuf = null;
+      vhsNoise = null;
+    }
+    resetDynamicBuffers();
 
     function renderCycleFrame(ctx, t) {
       if (!cycleIndices || !cyclePalette) return;
@@ -505,7 +517,21 @@
 
     // ─── PHOTO ENGINE ────────────────────────────────────
     let photoRawData = null;
+    let photoSourceImage = null;
     let photoMode = '256';
+
+    function applySourceToCanvas() {
+      if (!photoSourceImage) return false;
+      const W = photoSourceImage.naturalWidth, H = photoSourceImage.naturalHeight;
+      const side = Math.min(W, H);
+      const sx = (W - side) / 2, sy = (H - side) / 2;
+      const t = document.createElement('canvas');
+      t.width = CV_W;
+      t.height = CV_H;
+      t.getContext('2d').drawImage(photoSourceImage, sx, sy, side, side, 0, 0, CV_W, CV_H);
+      photoRawData = t.getContext('2d').getImageData(0, 0, CV_W, CV_H);
+      return true;
+    }
 
     function applyPhotoMode(mode) {
       if (!photoRawData) return;
@@ -513,19 +539,7 @@
       const ctx = cv.getContext('2d');
       const W = cv.width, H = cv.height;
 
-      if (mode === 'PX') {
-        const tmp = document.createElement('canvas'); tmp.width = 32; tmp.height = 32;
-        const tc = tmp.getContext('2d');
-        // scale from original
-        const full = document.createElement('canvas'); full.width = W; full.height = H;
-        full.getContext('2d').putImageData(photoRawData, 0, 0);
-        tc.drawImage(full, 0, 0, 32, 32);
-        const id = tc.getImageData(0, 0, 32, 32);
-        dither256(id, 32, 32);
-        tc.putImageData(id, 0, 0);
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(tmp, 0, 0, W, H);
-      } else if (mode === 'DITH') {
+      if (mode === 'DITH') {
         const id = new ImageData(new Uint8ClampedArray(photoRawData.data), W, H);
         dither256(id, W, H);
         ctx.putImageData(id, 0, 0);
@@ -552,7 +566,7 @@
     function setActive(btns, active) { btns.forEach(b => { b.classList.toggle('active', b === active); b.style.opacity = b === active ? '.9' : '.5'; }); }
 
     // Photo mode
-    const photoBtns = [$('btn256'), $('btnPX'), $('btnDITH')];
+    const photoBtns = [$('btn256'), $('btnDITH')];
     photoBtns.forEach(b => b.addEventListener('click', () => {
       photoMode = b.id.replace('btn', '');
       setActive(photoBtns, b);
@@ -573,6 +587,35 @@
     const spdBtns = [$('btnS1'), $('btnS2'), $('btnS3')];
     const spdVals = [0.6, 2, 5];
     spdBtns.forEach((b, i) => b.addEventListener('click', () => { cycleSpeed = spdVals[i]; setActive(spdBtns, b); }));
+
+    // Resolution
+    const resBtns = [$('btnR128'), $('btnR256'), $('btnR512'), $('btnR1024')];
+    const resVals = [128, 256, 512, 1024];
+    resBtns.forEach((b, i) => b.addEventListener('click', () => {
+      const size = resVals[i];
+      if (size === CV_W) return;
+      CV_W = size;
+      CV_H = size;
+      const cv = $('rgpc');
+      cv.width = CV_W;
+      cv.height = CV_H;
+      resetDynamicBuffers();
+      cycleIndices = null;
+      cyclePalette = null;
+      if (cycleRaf) {
+        cancelAnimationFrame(cycleRaf);
+        cycleRaf = null;
+      }
+      if (applySourceToCanvas()) {
+        applyPhotoMode(photoMode);
+        $('rgpstat').textContent = `OK // ${CV_W}x${CV_H}`;
+      } else {
+        cv.getContext('2d').clearRect(0, 0, CV_W, CV_H);
+        $('rgpstat').textContent = `READY // ${CV_W}x${CV_H}_`;
+        $('rgvstat').textContent = 'WAITING FOR PHOTO_';
+      }
+      setActive(resBtns, b);
+    }));
 
     // ─── SAVE / SHARE ────────────────────────────────────
     const canShare = !!(navigator.share && navigator.canShare);
@@ -715,16 +758,14 @@
         const img = new Image();
         img.onload = () => {
           URL.revokeObjectURL(url);
+          photoSourceImage = img;
           // 中央正方形自動クロップ：XYの短い方を一辺に、中心から切り出す
           const W = img.naturalWidth, H = img.naturalHeight;
           const side = Math.min(W, H);
-          const sx = (W - side) / 2, sy = (H - side) / 2;
-          const t = document.createElement('canvas'); t.width = CV_W; t.height = CV_H;
-          t.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, CV_W, CV_H);
-          photoRawData = t.getContext('2d').getImageData(0, 0, CV_W, CV_H);
+          applySourceToCanvas();
           $('rgpc').getContext('2d').putImageData(photoRawData, 0, 0);
           applyPhotoMode(photoMode);
-          $('rgpstat').textContent = 'OK // ' + side + '×' + side;
+          $('rgpstat').textContent = `OK // ${CV_W}x${CV_H}`;
           genFromImage();
         };
         img.src = url;
