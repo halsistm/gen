@@ -188,9 +188,13 @@
         <div class="cv-wrap" style="width:100%;max-width:384px">
           <canvas id="rgpc" width="128" height="128" class="rg-cv" style="width:100%"></canvas>
           <div class="scan-overlay"></div>
+          <div id="rgrec-badge"
+            style="display:none;position:absolute;top:4px;right:6px;font-size:7px;letter-spacing:1px;color:#ff3939">●
+            REC</div>
         </div>
         <div style="margin-top:5px;display:flex;gap:5px;align-items:center">
           <div id="rgpstat" style="font-size:8px;letter-spacing:1px;opacity:.35">READY_</div>
+          <div id="rgvstat" style="font-size:8px;letter-spacing:1px;opacity:.3;margin-left:auto">WAITING FOR PHOTO_</div>
         </div>
         <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btn256" class="rg-btn active" style="opacity:.9">256</button>
@@ -200,33 +204,14 @@
           <button id="btnSaveImgJpg" class="rg-btn" style="border-color:#39ff14">JPG</button>
           <button id="btnShareImg" class="rg-btn" style="border-color:#39ff14;display:none">SHARE</button>
         </div>
-        <div class="rg-sub">256=QUANTIZE / PX=PIXELATE / DITH=DITHER</div>
-      </div>
-
-      <!-- ② VIDEO // COLOR CYCLE -->
-      <div class="rg-panel">
-        <div class="rg-label">VIDEO // COLOR CYCLE</div>
-        <div class="cv-wrap" style="width:100%;max-width:192px">
-          <canvas id="rgvc" width="128" height="128" class="rg-cv" style="width:100%"></canvas>
-          <div class="scan-overlay"></div>
-          <div id="rgrec-badge"
-            style="display:none;position:absolute;top:4px;right:6px;font-size:7px;letter-spacing:1px;color:#ff3939">●
-            REC</div>
-        </div>
-        <div style="margin-top:5px;font-size:8px;letter-spacing:1px;opacity:.3" id="rgvstat">WAITING FOR PHOTO_</div>
-        <!-- MODE ROW 1 -->
-        <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
+        <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btnHUE" class="rg-btn active" style="opacity:.9">HUE</button>
           <button id="btnPULSE" class="rg-btn" style="opacity:.5">PULSE</button>
           <button id="btnSCAN" class="rg-btn" style="opacity:.5">SCAN</button>
           <button id="btnGLITCH" class="rg-btn" style="opacity:.5">GLITCH</button>
-        </div>
-        <!-- MODE ROW 2 -->
-        <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">
           <button id="btnPLASMA" class="rg-btn" style="opacity:.5">PLASMA</button>
           <button id="btnVHS" class="rg-btn" style="opacity:.5">VHS</button>
         </div>
-        <!-- SPEED -->
         <div style="margin-top:5px;display:flex;gap:4px;align-items:center">
           <span style="font-size:7px;opacity:.3;letter-spacing:1px">SPD</span>
           <button id="btnS1" class="rg-btn" style="opacity:.5;padding:3px 7px">▶</button>
@@ -235,10 +220,11 @@
           <button id="btnREC" class="rg-btn" style="opacity:.7;margin-left:auto;color:#ff6666;border-color:#3a1212">●
             REC</button>
         </div>
-        <div class="rg-sub">WEBM CAPTURE / ~3SEC</div>
+        <div class="rg-sub">256=QUANTIZE / PX=PIXELATE / DITH=DITHER</div>
+        <div class="rg-sub">FX + WEBM CAPTURE / ~3SEC</div>
       </div>
 
-      <!-- ③ MUSIC // CHIPTUNE -->
+      <!-- ② MUSIC // CHIPTUNE -->
       <div class="rg-panel" style="flex:1;min-width:140px">
         <div class="rg-label">MUSIC // CHIPTUNE</div>
         <div id="rgmi" style="font-size:11px;line-height:2;opacity:.65;min-height:66px">--</div>
@@ -507,7 +493,7 @@
     }
 
     function startCycle() {
-      const cv = $('rgvc');
+      const cv = $('rgpc');
       const ctx = cv.getContext('2d');
       if (cycleRaf) cancelAnimationFrame(cycleRaf);
       (function loop() {
@@ -630,7 +616,7 @@
     $('btnREC').addEventListener('click', () => {
       if (!cyclePalette) return;
       if (!isRec) {
-        const stream = $('rgvc').captureStream(15);
+        const stream = $('rgpc').captureStream(15);
         recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8' });
         recChunks = [];
         recorder.ondataavailable = e => recChunks.push(e.data);
